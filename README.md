@@ -1,4 +1,4 @@
-ttleBit Lifesteal Gamemode
+BattleBit Lifesteal Gamemode
 
 ### Join Public Server
 
