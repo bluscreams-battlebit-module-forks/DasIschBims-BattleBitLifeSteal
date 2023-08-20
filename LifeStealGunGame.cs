@@ -1,14 +1,27 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using BattleBitAPI.Common;
 using BattleBitAPI.Server;
+using BattleBitBaseModules;
 using BBRAPIModules;
 
 namespace LifeStealGunGame;
 
 public class LifeStealGunGame: BattleBitModule
 {
+    [ModuleReference]
+    public dynamic? RichText { get; set; }
+    
+    private readonly List<string> MapRotation = new()
+    {
+        "Azagor",
+        "Valley",
+        "River",
+        "Lonovo"
+    };
     public LifeStealGunGameConfiguration LifeStealGunGameConfiguration { get; set; } = new();
     private readonly Dictionary<ulong, LifeStealGunGamePlayer> players = new();
     private LifeStealGunGamePlayer getPlayer(RunnerPlayer player)
@@ -18,12 +31,22 @@ public class LifeStealGunGame: BattleBitModule
         
         return players[player.SteamID];
     }
-    
+
+    public override Task<bool> OnPlayerTypedMessage(RunnerPlayer player, ChatChannel channel, string msg)
+    {
+        Console.WriteLine($"[{channel}] {player.Name}: {msg}");
+        return Task.FromResult(true);
+    }
+
     public override Task OnConnected()
     {
-        Server.ServerSettings.PlayerCollision = true;
-        Server.MapRotation.AddToRotation("");
+        foreach (var map in MapRotation)
+        {
+            Server.MapRotation.AddToRotation(map);
+        }
+        
         Server.GamemodeRotation.AddToRotation("TDM");
+        Server.ServerSettings.PlayerCollision = true;
         Server.ServerSettings.FriendlyFireEnabled = true;
         
         return Task.CompletedTask; 
@@ -71,6 +94,35 @@ public class LifeStealGunGame: BattleBitModule
 
     public override Task OnTick()
     {
+        var top5 = players.Values.OrderByDescending(x => x.Kills).Take(5).ToList();
+        
+        var message = new StringBuilder();
+        // temporary warning
+        message.AppendLine($"{RichText.Bold(true)}{RichText.FromColorName("Red")} There currently is a bug where you get an \"Empty Weapon\" when you kill someone. This is a bug with the gamemode and will be fixed soon.");
+        
+        message.AppendLine($"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")} Life Steal Gun Game {RichText.FromColorName("White")}");
+        message.AppendLine($"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")} Top 5 Players {RichText.FromColorName("White")}");
+        message.AppendLine($"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
+        
+        for (var i = 0; i < top5.Count; i++)
+        {
+            var topPlayer = top5[i];
+            var kd = (float) topPlayer.Kills / (float) topPlayer.Deaths;
+            message.AppendLine($"{RichText.Bold(true)}{RichText.FromColorName("Gold")} {i + 1}. {RichText.FromColorName("White")}{topPlayer.Player.Name} {RichText.FromColorName("Gold")}Kills: {RichText.FromColorName("White")}{topPlayer.Kills} {RichText.FromColorName("Gold")}K/D: {RichText.FromColorName("White")}{Math.Round(kd, 2)}");
+        }
+
+        foreach (var player in Server.AllPlayers)
+        {
+            message.AppendLine($"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
+            message.AppendLine($"{RichText.Bold(true)}{RichText.FromColorName("SlateBlue")} Your Stats {RichText.FromColorName("White")}");
+            message.AppendLine($"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")} Kills: {RichText.FromColorName("White")}{getPlayer(player).Kills} {RichText.FromColorName("LawnGreen")}Deaths: {RichText.FromColorName("White")}{getPlayer(player).Deaths}");
+            var kd = (float) getPlayer(player).Kills / (float) getPlayer(player).Deaths;
+            message.AppendLine($"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")} K/D: {RichText.FromColorName("White")}{Math.Round(kd, 2)}");
+            message.AppendLine($"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
+            
+            player.Message(message.ToString());
+        }
+        
         Task.Run(async () =>
         {
             switch (Server.RoundSettings.State)
@@ -142,7 +194,6 @@ public class LifeStealGunGame: BattleBitModule
             getPlayer(args.Victim).Deaths++;
             
             var newLoadout = UpdateWeapon(args.Killer);
-            
             args.Killer.SetPrimaryWeapon(newLoadout.PrimaryWeapon, newLoadout.PrimaryExtraMagazines);
             args.Killer.SetSecondaryWeapon(newLoadout.SecondaryWeapon, newLoadout.SecondaryExtraMagazines);
             if (newLoadout.HeavyGadgetName == null)
@@ -186,7 +237,68 @@ public class LifeStealGunGameConfiguration
     {
         new PlayerLoadout()
         {
-            PrimaryWeapon = new WeaponItem { Tool = Weapons.KrissVector, MainSight = Attachments.RedDot, TopSight = null, Barrel = null, CantedSight = null, BoltAction = null, SideRail = null, UnderRail = null}
+            PrimaryWeapon = new WeaponItem { Tool = Weapons.KrissVector, MainSight = Attachments.RedDot },
+            PrimaryExtraMagazines = 20
+        },
+        new PlayerLoadout()
+        {
+            PrimaryWeapon = new WeaponItem { Tool = Weapons.FAL, MainSight = Attachments.RedDot, TopSight = null, Barrel = null, CantedSight = null, BoltAction = null, SideRail = null, UnderRail = null},
+            PrimaryExtraMagazines = 20
+        },
+        new PlayerLoadout()
+        {
+            PrimaryWeapon = new WeaponItem { Tool = Weapons.MP7, MainSight = Attachments.Holographic, TopSight = null, Barrel = null, CantedSight = null, BoltAction = null, SideRail = null, UnderRail = null},
+            PrimaryExtraMagazines = 20
+        },
+        new PlayerLoadout()
+        {
+            PrimaryWeapon = new WeaponItem { Tool = Weapons.MP5, MainSight = Attachments.RedDot, TopSight = null, Barrel = null, CantedSight = null, BoltAction = null, SideRail = null, UnderRail = null},
+            PrimaryExtraMagazines = 20
+        },
+        new PlayerLoadout()
+        {
+            PrimaryWeapon = new WeaponItem { Tool = Weapons.Groza, MainSight = Attachments.RedDot, TopSight = null, Barrel = null, CantedSight = null, BoltAction = null, SideRail = null, UnderRail = null},
+            PrimaryExtraMagazines = 20
+        },
+        new PlayerLoadout()
+        {
+            PrimaryWeapon = new WeaponItem { Tool = Weapons.HK419, MainSight = Attachments.RedDot, TopSight = null, Barrel = null, CantedSight = null, BoltAction = null, SideRail = null, UnderRail = null},
+            PrimaryExtraMagazines = 20
+        },
+        new PlayerLoadout()
+        {
+            PrimaryWeapon = new WeaponItem { Tool = Weapons.FAL, MainSight = Attachments.RedDot, TopSight = null, Barrel = null, CantedSight = null, BoltAction = null, SideRail = null, UnderRail = null},
+            PrimaryExtraMagazines = 20
+        },
+        new PlayerLoadout()
+        {
+            PrimaryWeapon = new WeaponItem { Tool = Weapons.MP7, MainSight = Attachments.Holographic, TopSight = null, Barrel = null, CantedSight = null, BoltAction = null, SideRail = null, UnderRail = null},
+            PrimaryExtraMagazines = 20
+        },
+        new PlayerLoadout()
+        {
+            PrimaryWeapon = new WeaponItem { Tool = Weapons.MP5, MainSight = Attachments.RedDot, TopSight = null, Barrel = null, CantedSight = null, BoltAction = null, SideRail = null, UnderRail = null},
+            PrimaryExtraMagazines = 20
+        },
+        new PlayerLoadout()
+        {
+            PrimaryWeapon = new WeaponItem { Tool = Weapons.Groza, MainSight = Attachments.RedDot, TopSight = null, Barrel = null, CantedSight = null, BoltAction = null, SideRail = null, UnderRail = null},
+            PrimaryExtraMagazines = 20
+        },
+        new PlayerLoadout()
+        {
+            PrimaryWeapon = new WeaponItem { Tool = Weapons.HK419, MainSight = Attachments.RedDot, TopSight = null, Barrel = null, CantedSight = null, BoltAction = null, SideRail = null, UnderRail = null},
+            PrimaryExtraMagazines = 20
+        },
+        new PlayerLoadout()
+        {
+            PrimaryWeapon = new WeaponItem { Tool = Weapons.Ultimax100, MainSight = Attachments.Holographic, TopSight = null, Barrel = null, CantedSight = null, BoltAction = null, SideRail = null, UnderRail = null},
+            PrimaryExtraMagazines = 20
+        },
+        new PlayerLoadout()
+        {
+            PrimaryWeapon = new WeaponItem { Tool = Weapons.M4A1, MainSight = Attachments.RedDot, TopSight = null, Barrel = null, CantedSight = null, BoltAction = null, SideRail = null, UnderRail = null},
+            PrimaryExtraMagazines = 20
         },
         new PlayerLoadout()
         {
