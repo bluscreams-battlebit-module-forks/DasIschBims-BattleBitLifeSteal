@@ -90,7 +90,8 @@ public class LifeStealGunGame : BattleBitModule
 
     public override Task OnSessionChanged(long oldSessionID, long newSessionID)
     {
-        players.Clear();
+        if (players.Count > 0)
+            players.Clear();
 
         return Task.CompletedTask;
     }
@@ -239,15 +240,15 @@ public class LifeStealGunGame : BattleBitModule
             getPlayer(args.Victim).Deaths++;
 
             var newLoadout = UpdateWeapon(args.Killer);
-            args.Killer.SetPrimaryWeapon(newLoadout.PrimaryWeapon, newLoadout.PrimaryExtraMagazines);
-            args.Killer.SetSecondaryWeapon(newLoadout.SecondaryWeapon, newLoadout.SecondaryExtraMagazines);
+            args.Killer.SetPrimaryWeapon(newLoadout.PrimaryWeapon, newLoadout.PrimaryExtraMagazines, true);
+            args.Killer.SetSecondaryWeapon(newLoadout.SecondaryWeapon, newLoadout.SecondaryExtraMagazines, true);
             if (newLoadout.HeavyGadgetName == null)
             {
                 newLoadout.HeavyGadget = default;
             }
             else
             {
-                args.Killer.SetHeavyGadget(newLoadout.HeavyGadget?.Name, newLoadout.HeavyGadgetExtra);
+                args.Killer.SetHeavyGadget(newLoadout.HeavyGadget?.Name, newLoadout.HeavyGadgetExtra, true);
             }
 
             if (newLoadout.LightGadgetName == null)
@@ -256,7 +257,7 @@ public class LifeStealGunGame : BattleBitModule
             }
             else
             {
-                args.Killer.SetLightGadget(newLoadout.LightGadget?.Name, newLoadout.LightGadgetExtra);
+                args.Killer.SetLightGadget(newLoadout.LightGadget?.Name, newLoadout.LightGadgetExtra, true);
             }
         }
 
