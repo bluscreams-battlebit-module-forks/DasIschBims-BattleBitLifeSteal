@@ -62,6 +62,8 @@ public class LifeStealGunGame : BattleBitModule
             .AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("White")}You have to kill other players to get a better weapon and to replenish your health.{RichText.Color()}{RichText.NewLine()}")
             .AppendLine(
+                $"{RichText.Bold(true)}{RichText.FromColorName("LimeGreen")}There are currently a total of {LifeStealGunGameConfiguration.LoadoutList.Count} levels.{RichText.Color()}{RichText.NewLine()}")
+            .AppendLine(
                 $"{RichText.Bold(true)}{RichText.Sprite("Special")}{RichText.FromColorName("White")}Made by {RichText.FromColorName("LightCoral")}@DasIschBims{RichText.Color()}{RichText.Sprite("Special")}{RichText.NewLine()}")
             .AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("Gold")}https://github.com/DasIschBims/BattleBitLifeSteal{RichText.Color()}{RichText.NewLine()}")
