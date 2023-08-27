@@ -8,3 +8,14 @@ BattleBit Lifesteal Gamemode
 
 ![image](https://github.com/DasIschBims/BattleBitLifeSteal/assets/46683337/f87270c9-61c6-46af-9a87-1060bba55d7d)
 
+For the API Runner:
+```json
+{
+  "IP": "0.0.0.0",
+  "Port": 30001,
+  "ModulePath": "./modules",
+  "DependencyPath": "./dependencies",
+  "ConfigurationPath": "./configurations",
+  "LogLevel": "107"
+}
+```
