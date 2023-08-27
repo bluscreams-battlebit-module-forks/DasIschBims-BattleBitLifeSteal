@@ -84,7 +84,7 @@ public class LifeStealGunGame : BattleBitModule
 
     public override Task OnPlayerConnected(RunnerPlayer player)
     {
-        Server.UILogOnServer($"{RichText.FromColorName("LimeGreen")}{player.Name} just joined the server!", 5);
+        Server.UILogOnServer($"{player.Name} joined the server!", 5);
 
         return Task.CompletedTask;
     }
@@ -93,7 +93,7 @@ public class LifeStealGunGame : BattleBitModule
     {
         players.Remove(player.SteamID);
 
-        Server.UILogOnServer($"{RichText.FromColorName("MediumVioletRed")}{player.Name} left the server!", 5);
+        Server.UILogOnServer($"{player.Name} left the server!", 5);
 
         return Task.CompletedTask;
     }
