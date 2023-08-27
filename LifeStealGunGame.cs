@@ -250,6 +250,7 @@ public class LifeStealGunGame : BattleBitModule
         // Disabled due to issues
         player.Modifications.JumpHeightMultiplier = 1.0f; // 1.25f;
         player.Modifications.RunningSpeedMultiplier = 1.0f; // 1.5f;
+        
         player.Modifications.FallDamageMultiplier = 0f;
         player.Modifications.CanSpectate = false;
         player.Modifications.ReloadSpeedMultiplier = 1.5f;
@@ -274,6 +275,9 @@ public class LifeStealGunGame : BattleBitModule
     {
         var loadout = GetNewWeapon(player);
         UpdateLoadout(player, loadout);
+        
+        request.Loadout.FirstAid = default;
+        request.Loadout.Throwable = default;
 
         return Task.FromResult<OnPlayerSpawnArguments?>(request);
     }
@@ -320,13 +324,7 @@ public class LifeStealGunGamePlayer
 public class LifeStealGunGameConfiguration
 {
     public readonly List<Loadout> LoadoutList = new()
-    {
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.KrissVector.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
+    {    
         new Loadout()
         {
             PrimaryWeapon = Weapons.M4A1.Name,
@@ -341,12 +339,158 @@ public class LifeStealGunGameConfiguration
         },
         new Loadout()
         {
+            PrimaryWeapon = Weapons.KrissVector.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.MP5.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.P90.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.AsVal.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.Groza.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.SCARH.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.SVD.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.MK14EBR.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.M110.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.MK20.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.AK15.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.AUGA3.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.MSR.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.Rem700.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.M200.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            PrimaryWeapon = Weapons.SV98.Name,
+            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            SecondaryWeapon = Weapons.DesertEagle.Name,
+            SecondaryWeaponSight = Attachments.RedDot.Name,
+            SecondaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            SecondaryWeapon = Weapons.Rsh12.Name,
+            SecondaryWeaponSight = Attachments.RedDot.Name,
+            SecondaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            SecondaryWeapon = Weapons.Glock18.Name,
+            SecondaryWeaponSight = Attachments.RedDot.Name,
+            SecondaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            SecondaryWeapon = Weapons.USP.Name,
+            SecondaryWeaponSight = Attachments.RedDot.Name,
+            SecondaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            SecondaryWeapon = Weapons.Unica.Name,
+            SecondaryWeaponSight = Attachments.RedDot.Name,
+            SecondaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            SecondaryWeapon = Weapons.MP443.Name,
+            SecondaryWeaponSight = Attachments.RedDot.Name,
+            SecondaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
+            SecondaryWeapon = Weapons.USP.Name,
+            SecondaryWeaponSight = Attachments.RedDot.Name,
+            SecondaryExtraMagazines = byte.MaxValue
+        },
+        new Loadout()
+        {
             HeavyGadgetName = Gadgets.Rpg7HeatExplosive.Name,
             HeavyGadgetExtra = byte.MaxValue,
         },
         new Loadout()
         {
+            HeavyGadgetName = Gadgets.SledgeHammerSkinC.Name,
+        },
+        new Loadout()
+        {
             HeavyGadgetName = Gadgets.PickaxeIronPickaxe.Name,
+        },
+        new Loadout()
+        {
+            LightGadgetName = Gadgets.SuicideC4.Name,
         }
     };
 }
