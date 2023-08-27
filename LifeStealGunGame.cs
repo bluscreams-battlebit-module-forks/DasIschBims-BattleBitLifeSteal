@@ -273,7 +273,7 @@ public class LifeStealGunGame : BattleBitModule
         player.Modifications.HitMarkersEnabled = false;
         player.Modifications.KillFeed = true;
         player.Modifications.AirStrafe = true;
-        player.Modifications.CanSuicide = true;
+        player.Modifications.CanSuicide = false;
         player.Modifications.StaminaEnabled = false;
         player.Modifications.PointLogHudEnabled = false;
         player.Modifications.SpawningRule = SpawningRule.None;
