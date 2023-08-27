@@ -52,6 +52,9 @@ public class LifeStealGunGame : BattleBitModule
         Server.GamemodeRotation.AddToRotation("TDM");
         Server.ServerSettings.PlayerCollision = true;
         Server.ServerSettings.FriendlyFireEnabled = true;
+        Server.ServerSettings.CanVoteDay = true;
+        Server.ServerSettings.CanVoteNight = false;
+        Server.ServerSettings.FriendlyFireEnabled = true;
 
         welcomeMessage = new StringBuilder()
             .AppendLine(
@@ -170,6 +173,8 @@ public class LifeStealGunGame : BattleBitModule
                 case GameState.Playing:
                 {
                     Server.RoundSettings.SecondsLeft = 69420;
+                    Server.RoundSettings.TeamATickets = 69420;
+                    Server.RoundSettings.TeamBTickets = 69420;
                     break;
                 }
                 case GameState.WaitingForPlayers:
@@ -258,6 +263,9 @@ public class LifeStealGunGame : BattleBitModule
         player.Modifications.AirStrafe = true;
         player.Modifications.CanSuicide = true;
         player.Modifications.StaminaEnabled = false;
+        player.Modifications.PointLogHudEnabled = false;
+        player.Modifications.SpawningRule = SpawningRule.None;
+        player.Modifications.FriendlyHUDEnabled = false;
 
         return Task.CompletedTask;
     }
