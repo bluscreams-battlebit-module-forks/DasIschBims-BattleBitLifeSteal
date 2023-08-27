@@ -133,39 +133,44 @@ public class LifeStealGunGame : BattleBitModule
     {
         var top5 = players.Values.OrderByDescending(x => x.Kills).Take(5).ToList();
 
-        var message = new StringBuilder();
-        message.AppendLine(
+        var infoMessage = new StringBuilder();
+        infoMessage.AppendLine(
             $"{RichText.Bold(true)}{RichText.FromColorName("MediumVioletRed")} Life Steal Gun Game {RichText.FromColorName("LightSkyBlue")}by @DasIschBims{RichText.Color()}{RichText.NewLine()}");
-        message.AppendLine(
+        infoMessage.AppendLine(
             $"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")}{RichText.Sprite("Veteran")} Top 5 Players {RichText.Sprite("Veteran")}");
-        message.AppendLine(
+        infoMessage.AppendLine(
             $"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
 
+        var leaderboardMessage = new StringBuilder();
         for (var i = 0; i < top5.Count; i++)
         {
             var topPlayer = top5[i];
-            message.AppendLine(
+            leaderboardMessage.AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("Gold")} {i + 1}. {RichText.FromColorName("White")}{topPlayer.Player.Name} {RichText.FromColorName("Gold")}Kills: {RichText.FromColorName("White")}{topPlayer.Kills} {RichText.FromColorName("Gold")}K/D: {RichText.FromColorName("White")}{topPlayer.Kd}");
         }
 
         foreach (var player in Server.AllPlayers)
         {
-            message.AppendLine(
+            var playerStatsMessage = new StringBuilder();
+            playerStatsMessage.AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
-            message.AppendLine(
+            playerStatsMessage.AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("Gold")} Your Stats {RichText.FromColorName("White")}");
-            message.AppendLine(
+            playerStatsMessage.AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")} Kills: {RichText.FromColorName("White")}{getPlayer(player).Kills} {RichText.FromColorName("Red")}Deaths: {RichText.FromColorName("White")}{getPlayer(player).Deaths}");
-            message.AppendLine(
+            playerStatsMessage.AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("Blue")} K/D: {RichText.FromColorName("White")}{getPlayer(player).Kd}");
-            message.AppendLine(
+            playerStatsMessage.AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
 
             if (player.IsAlive)
-                player.Message(message.ToString());
-
-            if (player.HP < 0 && getPlayer(player).Deaths == 0)
+            {
+                player.Message(infoMessage.ToString() + leaderboardMessage.ToString() + playerStatsMessage.ToString());
+            }
+            else if (player.HP < 0 && getPlayer(player).Deaths == 0)
+            {
                 player.Message(welcomeMessage);
+            }
         }
 
         Task.Run(async () =>
@@ -233,16 +238,20 @@ public class LifeStealGunGame : BattleBitModule
         var lightGadgetExtra = loadout.LightGadgetExtra == 0
             ? default
             : loadout.LightGadgetExtra;
-        
+
         if (primaryWeapon != null)
-            player.SetPrimaryWeapon(new WeaponItem(){ ToolName = primaryWeapon, MainSightName = loadout.PrimaryWeaponSight}, primaryExtraMagazines, true);
-                
+            player.SetPrimaryWeapon(
+                new WeaponItem() { ToolName = primaryWeapon, MainSightName = loadout.PrimaryWeaponSight },
+                primaryExtraMagazines, true);
+
         if (secondaryWeapon != null)
-            player.SetSecondaryWeapon(new WeaponItem(){ ToolName = secondaryWeapon, MainSightName = loadout.SecondaryWeaponSight}, secondaryExtraMagazines, true);
-        
+            player.SetSecondaryWeapon(
+                new WeaponItem() { ToolName = secondaryWeapon, MainSightName = loadout.SecondaryWeaponSight },
+                secondaryExtraMagazines, true);
+
         if (heavyGadgetName != null)
             player.SetHeavyGadget(heavyGadgetName, heavyGadgetExtra, true);
-        
+
         if (lightGadgetName != null)
             player.SetLightGadget(lightGadgetName, lightGadgetExtra, true);
     }
@@ -252,7 +261,7 @@ public class LifeStealGunGame : BattleBitModule
         // Disabled due to issues
         player.Modifications.JumpHeightMultiplier = 1.0f; // 1.25f;
         player.Modifications.RunningSpeedMultiplier = 1.0f; // 1.5f;
-        
+
         player.Modifications.FallDamageMultiplier = 0f;
         player.Modifications.CanSpectate = false;
         player.Modifications.ReloadSpeedMultiplier = 1.5f;
@@ -277,7 +286,7 @@ public class LifeStealGunGame : BattleBitModule
     {
         var loadout = GetNewWeapon(player);
         UpdateLoadout(player, loadout);
-        
+
         request.Loadout.FirstAid = default;
         request.Loadout.Throwable = default;
 
@@ -320,13 +329,13 @@ public class LifeStealGunGamePlayer
 
     public int Kills { get; set; }
     public int Deaths { get; set; }
-    public float Kd => Deaths == 0 ? Kills : (float)Kills / Deaths;
+    public float Kd => Deaths == 0 ? Kills : (float)Math.Round((float)Kills / Deaths, 2);
 }
 
 public class LifeStealGunGameConfiguration
 {
     public readonly List<Loadout> LoadoutList = new()
-    {    
+    {
         new Loadout()
         {
             PrimaryWeapon = Weapons.M4A1.Name,
