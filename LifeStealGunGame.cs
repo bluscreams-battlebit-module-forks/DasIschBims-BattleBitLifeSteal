@@ -423,25 +423,25 @@ public class LifeStealGunGameConfiguration
         new Loadout()
         {
             PrimaryWeapon = Weapons.MSR.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryWeaponSight = Attachments.TRI4X32.Name,
             PrimaryExtraMagazines = byte.MaxValue
         },
         new Loadout()
         {
             PrimaryWeapon = Weapons.Rem700.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryWeaponSight = Attachments.TRI4X32.Name,
             PrimaryExtraMagazines = byte.MaxValue
         },
         new Loadout()
         {
             PrimaryWeapon = Weapons.M200.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryWeaponSight = Attachments.TRI4X32.Name,
             PrimaryExtraMagazines = byte.MaxValue
         },
         new Loadout()
         {
             PrimaryWeapon = Weapons.SV98.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
+            PrimaryWeaponSight = Attachments.TRI4X32.Name,
             PrimaryExtraMagazines = byte.MaxValue
         },
         new Loadout()
