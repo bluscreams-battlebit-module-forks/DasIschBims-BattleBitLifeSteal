@@ -167,7 +167,7 @@ public class LifeStealGunGame : BattleBitModule
             {
                 player.Message(infoMessage.ToString() + leaderboardMessage.ToString() + playerStatsMessage.ToString());
             }
-            else if (player.HP < 0 && getPlayer(player).Deaths == 0)
+            else if (player.HP < 0 || getPlayer(player).Deaths == 0)
             {
                 player.Message(welcomeMessage);
             }
