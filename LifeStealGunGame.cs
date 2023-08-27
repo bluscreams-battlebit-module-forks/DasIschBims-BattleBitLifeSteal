@@ -37,7 +37,7 @@ public class LifeStealGunGame : BattleBitModule
 
     public override Task<bool> OnPlayerTypedMessage(RunnerPlayer player, ChatChannel channel, string msg)
     {
-        Console.WriteLine($"[{channel}] {player.Name}: {msg}");
+        Console.WriteLine($"[{channel}] ({player.Name} | {player.SteamID}): {msg}");
 
         return Task.FromResult(true);
     }
@@ -80,7 +80,6 @@ public class LifeStealGunGame : BattleBitModule
     public override Task OnPlayerConnected(RunnerPlayer player)
     {
         Server.SayToAllChat($"{RichText.FromColorName("LimeGreen")}{player.Name} just joined the server!");
-        Console.WriteLine($"[Join] {player.Name} | {player.SteamID}");
 
         return Task.CompletedTask;
     }
@@ -90,7 +89,6 @@ public class LifeStealGunGame : BattleBitModule
         players.Remove(player.SteamID);
 
         Server.SayToAllChat($"{RichText.FromColorName("MediumVioletRed")}{player.Name} left the server!");
-        Console.WriteLine($"[Leave] {player.Name} | {player.SteamID}");
 
         return Task.CompletedTask;
     }
