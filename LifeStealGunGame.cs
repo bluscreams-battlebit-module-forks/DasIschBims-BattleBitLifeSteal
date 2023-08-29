@@ -259,8 +259,8 @@ public class LifeStealGunGame : BattleBitModule
     public override Task OnPlayerSpawned(RunnerPlayer player)
     {
         // Disabled due to issues
-        player.Modifications.JumpHeightMultiplier = 1.0f; // 1.25f;
-        player.Modifications.RunningSpeedMultiplier = 1.0f; // 1.5f;
+        player.Modifications.JumpHeightMultiplier = 1.25f;
+        player.Modifications.RunningSpeedMultiplier = 1.5f;
 
         player.Modifications.FallDamageMultiplier = 0f;
         player.Modifications.CanSpectate = false;
