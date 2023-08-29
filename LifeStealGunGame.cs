@@ -38,7 +38,7 @@ public class LifeStealGunGame : BattleBitModule
     public override Task<bool> OnPlayerTypedMessage(RunnerPlayer player, ChatChannel channel, string msg)
     {
         Console.WriteLine($"[{channel}] ({player.Name} | {player.SteamID}): {msg}");
-
+        Server.AnnounceLong($"{RichText.Sprite("Special")}{RichText.FromColorName("Black")}{player.Name} won the game!{RichText.Sprite("Special")}");
         return Task.FromResult(true);
     }
 
@@ -129,50 +129,8 @@ public class LifeStealGunGame : BattleBitModule
         return Task.FromResult(false);
     }
 
-    public override Task OnTick()
+    public override async Task OnTick()
     {
-        var top5 = players.Values.OrderByDescending(x => x.Kills).Take(5).ToList();
-
-        var infoMessage = new StringBuilder();
-        infoMessage.AppendLine(
-            $"{RichText.Bold(true)}{RichText.FromColorName("MediumVioletRed")} Life Steal Gun Game {RichText.FromColorName("LightSkyBlue")}by @DasIschBims{RichText.Color()}{RichText.NewLine()}");
-        infoMessage.AppendLine(
-            $"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")}{RichText.Sprite("Veteran")} Top 5 Players {RichText.Sprite("Veteran")}");
-        infoMessage.AppendLine(
-            $"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
-
-        var leaderboardMessage = new StringBuilder();
-        for (var i = 0; i < top5.Count; i++)
-        {
-            var topPlayer = top5[i];
-            leaderboardMessage.AppendLine(
-                $"{RichText.Bold(true)}{RichText.FromColorName("Gold")} {i + 1}. {RichText.FromColorName("White")}{topPlayer.Player.Name} {RichText.FromColorName("Gold")}Kills: {RichText.FromColorName("White")}{topPlayer.Kills} {RichText.FromColorName("Gold")}K/D: {RichText.FromColorName("White")}{topPlayer.Kd}");
-        }
-
-        foreach (var player in Server.AllPlayers)
-        {
-            var playerStatsMessage = new StringBuilder();
-            playerStatsMessage.AppendLine(
-                $"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
-            playerStatsMessage.AppendLine(
-                $"{RichText.Bold(true)}{RichText.FromColorName("Gold")} Your Stats {RichText.FromColorName("White")}");
-            playerStatsMessage.AppendLine(
-                $"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")} Kills: {RichText.FromColorName("White")}{getPlayer(player).Kills} {RichText.FromColorName("Red")}Deaths: {RichText.FromColorName("White")}{getPlayer(player).Deaths}");
-            playerStatsMessage.AppendLine(
-                $"{RichText.Bold(true)}{RichText.FromColorName("Blue")} K/D: {RichText.FromColorName("White")}{getPlayer(player).Kd}");
-            playerStatsMessage.AppendLine(
-                $"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
-
-            if (player.IsAlive)
-            {
-                player.Message(infoMessage.ToString() + leaderboardMessage.ToString() + playerStatsMessage.ToString());
-            }
-            else if (player.HP < 0 || getPlayer(player).Deaths == 0)
-            {
-                player.Message(welcomeMessage);
-            }
-        }
-
         Task.Run(async () =>
         {
             switch (Server.RoundSettings.State)
@@ -191,10 +149,53 @@ public class LifeStealGunGame : BattleBitModule
                 }
             }
 
+            var top5 = players.Values.OrderByDescending(x => x.Kills).Take(5).ToList();
+
+            var infoMessage = new StringBuilder();
+            infoMessage.AppendLine(
+                $"{RichText.Bold(true)}{RichText.FromColorName("MediumVioletRed")} Life Steal Gun Game {RichText.FromColorName("LightSkyBlue")}by @DasIschBims{RichText.Color()}{RichText.NewLine()}");
+            infoMessage.AppendLine(
+                $"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")}{RichText.Sprite("Veteran")} Top 5 Players {RichText.Sprite("Veteran")}");
+            infoMessage.AppendLine(
+                $"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
+
+            var leaderboardMessage = new StringBuilder();
+            for (var i = 0; i < top5.Count; i++)
+            {
+                var topPlayer = top5[i];
+                leaderboardMessage.AppendLine(
+                    $"{RichText.Bold(true)}{RichText.FromColorName("Gold")} {i + 1}. {RichText.FromColorName("White")}{topPlayer.Player.Name} {RichText.FromColorName("Gold")}Kills: {RichText.FromColorName("White")}{topPlayer.Kills} {RichText.FromColorName("Gold")}K/D: {RichText.FromColorName("White")}{topPlayer.Kd}");
+            }
+
+            foreach (var player in Server.AllPlayers)
+            {
+                var playerStatsMessage = new StringBuilder();
+                playerStatsMessage.AppendLine(
+                    $"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
+                playerStatsMessage.AppendLine(
+                    $"{RichText.Bold(true)}{RichText.FromColorName("Gold")} Your Stats {RichText.FromColorName("White")}");
+                playerStatsMessage.AppendLine(
+                    $"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")} Kills: {RichText.FromColorName("White")}{getPlayer(player).Kills} {RichText.FromColorName("Red")}Deaths: {RichText.FromColorName("White")}{getPlayer(player).Deaths}");
+                playerStatsMessage.AppendLine(
+                    $"{RichText.Bold(true)}{RichText.FromColorName("Blue")} K/D: {RichText.FromColorName("White")}{getPlayer(player).Kd}");
+                playerStatsMessage.AppendLine(
+                    $"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
+
+                if (player.IsAlive)
+                {
+                    player.Message(infoMessage.ToString() + leaderboardMessage.ToString() +
+                                   playerStatsMessage.ToString());
+                }
+                else if (player.HP < 0 || getPlayer(player).Deaths == 0)
+                {
+                    player.Message(welcomeMessage);
+                }
+            }
+
             await Task.Delay(1000);
         });
 
-        return Task.CompletedTask;
+        await Task.CompletedTask;
     }
 
     public Loadout GetNewWeapon(RunnerPlayer player)
@@ -202,6 +203,8 @@ public class LifeStealGunGame : BattleBitModule
         if (getPlayer(player).Kills >= LifeStealGunGameConfiguration.LoadoutList.Count)
         {
             Server.SayToAllChat(
+                $"{RichText.FromColorName("Gold")}{player.Name} won the game!");
+            Server.AnnounceLong(
                 $"{RichText.FromColorName("Gold")}{player.Name} won the game!");
             Server.ForceEndGame();
             return default;
