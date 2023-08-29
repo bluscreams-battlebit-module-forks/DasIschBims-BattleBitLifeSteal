@@ -38,7 +38,6 @@ public class LifeStealGunGame : BattleBitModule
     public override Task<bool> OnPlayerTypedMessage(RunnerPlayer player, ChatChannel channel, string msg)
     {
         Console.WriteLine($"[{channel}] ({player.Name} | {player.SteamID}): {msg}");
-        Server.AnnounceLong($"{RichText.Sprite("Special")}{RichText.FromColorName("Black")}{player.Name} won the game!{RichText.Sprite("Special")}");
         return Task.FromResult(true);
     }
 
@@ -205,7 +204,7 @@ public class LifeStealGunGame : BattleBitModule
             Server.SayToAllChat(
                 $"{RichText.FromColorName("Gold")}{player.Name} won the game!");
             Server.AnnounceLong(
-                $"{RichText.FromColorName("Gold")}{player.Name} won the game!");
+                $"{RichText.Sprite("Special")}{RichText.FromColorName("Black")}{player.Name} won the game!{RichText.Sprite("Special")}");
             Server.ForceEndGame();
             return default;
         }
