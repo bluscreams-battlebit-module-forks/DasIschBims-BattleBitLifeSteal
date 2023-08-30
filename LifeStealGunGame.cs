@@ -14,13 +14,17 @@ namespace LifeStealGunGame;
 public class LifeStealGunGame : BattleBitModule
 {
     [ModuleReference] public dynamic? RichText { get; set; }
+    [ModuleReference] public dynamic? LoadingScreenText { get; set; }
 
     private readonly List<string> MapRotation = new()
     {
         "Azagor",
         "Valley",
         "River",
-        "Lonovo"
+        "Lonovo",
+        "Basra",
+        "Namak",
+        "Wineparadise"
     };
 
     public string welcomeMessage = String.Empty;
@@ -54,6 +58,7 @@ public class LifeStealGunGame : BattleBitModule
         Server.ServerSettings.CanVoteDay = true;
         Server.ServerSettings.CanVoteNight = false;
         Server.ServerSettings.FriendlyFireEnabled = true;
+        Server.ServerSettings.TeamlessMode = true;
 
         welcomeMessage = new StringBuilder()
             .AppendLine(
@@ -137,8 +142,6 @@ public class LifeStealGunGame : BattleBitModule
                 case GameState.Playing:
                 {
                     Server.RoundSettings.SecondsLeft = 69420;
-                    Server.RoundSettings.TeamATickets = 69420;
-                    Server.RoundSettings.TeamBTickets = 69420;
                     break;
                 }
                 case GameState.WaitingForPlayers:
