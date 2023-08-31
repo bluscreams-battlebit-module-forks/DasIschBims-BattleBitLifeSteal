@@ -15,6 +15,8 @@ public class LifeStealGunGame : BattleBitModule
 {
     [ModuleReference] public dynamic? RichText { get; set; }
     [ModuleReference] public dynamic? LoadingScreenText { get; set; }
+    [ModuleReference] public dynamic? ProfanityFilter { get; set; }
+    [ModuleReference] public dynamic? DiscordWebhook { get; set; }
 
     private readonly List<string> MapRotation = new()
     {
@@ -24,7 +26,12 @@ public class LifeStealGunGame : BattleBitModule
         "Lonovo",
         "Basra",
         "Namak",
-        "Wineparadise"
+        "Frugis",
+        "Dustydew",
+        "Construction",
+        "Wineparadise",
+        "Old_Multuislands",
+        "Old_Namak"
     };
 
     public string welcomeMessage = String.Empty;
@@ -52,13 +59,16 @@ public class LifeStealGunGame : BattleBitModule
             Server.MapRotation.AddToRotation(map);
         }
 
+        Server.ExecuteCommand("set fps 128");
+
         Server.GamemodeRotation.AddToRotation("TDM");
         Server.ServerSettings.PlayerCollision = true;
         Server.ServerSettings.FriendlyFireEnabled = true;
         Server.ServerSettings.CanVoteDay = true;
         Server.ServerSettings.CanVoteNight = false;
         Server.ServerSettings.FriendlyFireEnabled = true;
-        Server.ServerSettings.TeamlessMode = true;
+        Server.ServerSettings.TeamlessMode = false;
+        Server.ServerSettings.UnlockAllAttachments = true;
 
         welcomeMessage = new StringBuilder()
             .AppendLine(
@@ -70,18 +80,10 @@ public class LifeStealGunGame : BattleBitModule
             .AppendLine(
                 $"{RichText.Bold(true)}{RichText.Sprite("Special")}{RichText.FromColorName("White")}Made by {RichText.FromColorName("LightCoral")}@DasIschBims{RichText.Color()}{RichText.Sprite("Special")}{RichText.NewLine()}")
             .AppendLine(
-                $"{RichText.Bold(true)}{RichText.FromColorName("Gold")}https://github.com/DasIschBims/BattleBitLifeSteal{RichText.Color()}{RichText.NewLine()}")
+                $"{RichText.Bold(true)}GitHub: {RichText.FromColorName("Gold")}https://github.com/DasIschBims/BattleBitLifeSteal{RichText.Color()}{RichText.NewLine()}")
+            .AppendLine(
+                $"{RichText.Bold(true)}Discord: <color=#9370DB>https://dsc.gg/bblifesteal{RichText.Color()}{RichText.NewLine()}")
             .ToString();
-
-        return Task.CompletedTask;
-    }
-
-    public override Task OnPlayerJoiningToServer(ulong steamId, PlayerJoiningArguments args)
-    {
-        var stats = args.Stats;
-
-        stats.Progress.Rank = 200;
-        stats.Progress.Prestige = 10;
 
         return Task.CompletedTask;
     }
@@ -142,6 +144,8 @@ public class LifeStealGunGame : BattleBitModule
                 case GameState.Playing:
                 {
                     Server.RoundSettings.SecondsLeft = 69420;
+		            Server.RoundSettings.TeamATickets = 69420;
+                    Server.RoundSettings.TeamBTickets = 69420;
                     break;
                 }
                 case GameState.WaitingForPlayers:
@@ -271,18 +275,18 @@ public class LifeStealGunGame : BattleBitModule
         player.Modifications.CanSpectate = false;
         player.Modifications.ReloadSpeedMultiplier = 1.5f;
         player.Modifications.GiveDamageMultiplier = 1f;
-        player.Modifications.RespawnTime = 0;
-        player.Modifications.DownTimeGiveUpTime = 0;
+        player.Modifications.RespawnTime = 1;
+        player.Modifications.DownTimeGiveUpTime = 1;
         player.Modifications.MinimumDamageToStartBleeding = 100f;
         player.Modifications.MinimumHpToStartBleeding = 0f;
-        player.Modifications.HitMarkersEnabled = false;
+        player.Modifications.HitMarkersEnabled = true;
         player.Modifications.KillFeed = true;
         player.Modifications.AirStrafe = true;
         player.Modifications.CanSuicide = false;
         player.Modifications.StaminaEnabled = false;
         player.Modifications.PointLogHudEnabled = false;
         player.Modifications.SpawningRule = SpawningRule.None;
-        player.Modifications.FriendlyHUDEnabled = false;
+        player.Modifications.FriendlyHUDEnabled = true;
 
         return Task.CompletedTask;
     }
@@ -307,8 +311,7 @@ public class LifeStealGunGame : BattleBitModule
         }
         else
         {
-            Task.Delay(200);
-            args.Victim.Kill();
+            // args.Victim.Kill();
             args.Killer.SetHP(100);
 
             getPlayer(args.Killer).Kills++;
