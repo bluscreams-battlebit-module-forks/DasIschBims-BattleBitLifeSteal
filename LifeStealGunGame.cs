@@ -148,7 +148,7 @@ public class LifeStealGunGame : BattleBitModule
 
     public override async Task OnTick()
     {
-        await Task.Run(async () =>
+        Task.Run(async () =>
         {
             switch (Server.RoundSettings.State)
             {
@@ -171,8 +171,6 @@ public class LifeStealGunGame : BattleBitModule
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            await Task.Delay(1000);
         });
     }
 
@@ -197,6 +195,8 @@ public class LifeStealGunGame : BattleBitModule
             var playerStatsMessage = new StringBuilder();
             playerStatsMessage.AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
+            playerStatsMessage.AppendLine(
+                $"{RichText.Bold(true)}{RichText.FromColorName("Gold")}Next Weapon: {LifeStealGunGameConfiguration.LoadoutList[GetPlayer(player).Kills].PrimaryWeapon}{RichText.Color()}{RichText.NewLine()}");
             playerStatsMessage.AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("Gold")} Your Stats {RichText.FromColorName("White")}");
             playerStatsMessage.AppendLine(
@@ -243,13 +243,17 @@ public class LifeStealGunGame : BattleBitModule
             : loadout.LightGadgetExtra;
 
         if (primaryWeapon != null)
+        {
+            var cantedSight = loadout.PrimaryWeaponCantedSight == null ? default : new Attachment(loadout.PrimaryWeaponCantedSight, AttachmentType.CantedSight);
             player.SetPrimaryWeapon(
                 new WeaponItem()
                 {
                     ToolName = primaryWeapon, MainSightName = loadout.PrimaryWeaponSight,
                     BarrelName = loadout.PrimaryWeaponBarrel, UnderRailName = loadout.PrimaryWeaponUnderBarrel,
+                    CantedSight = cantedSight
                 },
                 primaryExtraMagazines, true);
+        }
 
         if (secondaryWeapon != null)
             player.SetSecondaryWeapon(
@@ -295,6 +299,8 @@ public class LifeStealGunGame : BattleBitModule
             loadout.PrimaryWeaponBarrel = random.Next(0, 100) < 69 ? null : GetRandomItem(barrels, random).Name;
             loadout.PrimaryWeaponUnderBarrel = random.Next(0, 100) < 69 ? null : GetRandomItem(underBarrels, random).Name;
             loadout.PrimaryWeaponSight = GetRandomItem(sights, random).Name;
+            if (weapon.WeaponType == WeaponType.SniperRifle)
+                loadout.PrimaryWeaponCantedSight = Attachments.Ironsight.Name;
             loadout.HeavyGadgetName = random.Next(0, 100) < 69 ? null : GetRandomItem(gadgets, random).Name;
 
             loadouts.Add(loadout);
@@ -331,23 +337,24 @@ public class LifeStealGunGame : BattleBitModule
 
     private Loadout GetNewWeapon(RunnerPlayer player)
     {
-        if (GetPlayer(player).Kills >= LifeStealGunGameConfiguration.LoadoutList.Count)
+        if (GetPlayer(player).Kills >= LifeStealGunGameConfiguration.LoadoutList.Count * 2)
         {
             Server.SayToAllChat(
                 $"{RichText.FromColorName("Gold")}{player.Name} won the game!");
             Server.AnnounceLong(
                 $"{RichText.Sprite("Special")}{RichText.FromColorName("Black")}{player.Name} won the game!{RichText.Sprite("Special")}");
 
-            var top5 = players.Values.OrderByDescending(x => x.Kills).Take(5).ToList();
-            var topPlayerList = top5.Select(topPlayer => new EndGamePlayer<RunnerPlayer>(topPlayer.Player, GetPlayer(topPlayer.Player).Kills)).ToList();
+            var top3 = players.Values.OrderByDescending(x => x.Kills).Take(3).ToList();
+            var topPlayerList = top3.Select(topPlayer => new EndGamePlayer<RunnerPlayer>(topPlayer.Player, GetPlayer(topPlayer.Player).Kills)).ToList();
 
             Server.ForceEndGame(topPlayerList);
             return default;
         }
 
+        var currentWeaponIndex = GetPlayer(player).Kills / 2;
         var loadout = new Loadout()
         {
-            PrimaryWeapon = LifeStealGunGameConfiguration.WeaponList[GetPlayer(player).Kills].Name,
+            PrimaryWeapon = LifeStealGunGameConfiguration.WeaponList[currentWeaponIndex].Name,
             PrimaryWeaponSight = GetRandomAttachment(LifeStealGunGameConfiguration.SightList),
             PrimaryWeaponBarrel = GetRandomAttachment(LifeStealGunGameConfiguration.BarrelList),
             PrimaryWeaponUnderBarrel = GetRandomAttachment(LifeStealGunGameConfiguration.UnderBarrelRailList),
@@ -377,7 +384,7 @@ public class LifeStealGunGame : BattleBitModule
         player.Modifications.ReloadSpeedMultiplier = 1.5f;
         player.Modifications.GiveDamageMultiplier = 1f;
         player.Modifications.RespawnTime = 1;
-        player.Modifications.DownTimeGiveUpTime = 2;
+        player.Modifications.DownTimeGiveUpTime = 5;
         player.Modifications.MinimumDamageToStartBleeding = 100f;
         player.Modifications.MinimumHpToStartBleeding = 0f;
         player.Modifications.HitMarkersEnabled = true;
@@ -517,6 +524,7 @@ public struct Loadout
 {
     public string? PrimaryWeapon { get; set; } = default;
     public string? PrimaryWeaponSight { get; set; } = default;
+    public string? PrimaryWeaponCantedSight { get; set; } = default;
     public string? PrimaryWeaponBarrel { get; set; } = default;
     public string? PrimaryWeaponUnderBarrel { get; set; } = default;
     public byte PrimaryExtraMagazines { get; set; } = 0;
@@ -526,19 +534,8 @@ public struct Loadout
     public string? HeavyGadgetName { get; set; } = default;
     public byte HeavyGadgetExtra { get; set; } = 0;
     public string? LightGadgetName { get; set; } = default;
+
     public byte LightGadgetExtra { get; set; } = 0;
 
-    public Loadout(string? primaryWeapon, byte primaryExtraMagazines, string secondaryWeapon,
-        byte secondaryExtraMagazines, string heavyGadgetName, byte heavyGadgetExtra, string lightGadgetName,
-        byte lightGadgetExtra)
-    {
-        PrimaryWeapon = primaryWeapon;
-        PrimaryExtraMagazines = primaryExtraMagazines;
-        SecondaryWeapon = secondaryWeapon;
-        SecondaryExtraMagazines = secondaryExtraMagazines;
-        HeavyGadgetName = heavyGadgetName;
-        HeavyGadgetExtra = heavyGadgetExtra;
-        LightGadgetName = lightGadgetName;
-        LightGadgetExtra = lightGadgetExtra;
-    }
+    public Loadout() {}
 }
