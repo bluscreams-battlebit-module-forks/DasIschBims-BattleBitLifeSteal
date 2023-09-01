@@ -30,16 +30,15 @@ public class LifeStealGunGame : BattleBitModule
         "Frugis",
         "Dustydew",
         "Construction",
-        "Wineparadise",
         "Old_Multuislands",
         "Old_Namak"
     };
 
-    public string welcomeMessage = String.Empty;
-    public LifeStealGunGameConfiguration LifeStealGunGameConfiguration { get; set; } = new();
+    private string welcomeMessage = String.Empty;
+    private LifeStealGunGameConfiguration LifeStealGunGameConfiguration { get; set; } = new();
     private readonly Dictionary<ulong, LifeStealGunGamePlayer> players = new();
 
-    private LifeStealGunGamePlayer getPlayer(RunnerPlayer player)
+    private LifeStealGunGamePlayer GetPlayer(RunnerPlayer player)
     {
         if (!players.ContainsKey(player.SteamID))
             players.Add(player.SteamID, new LifeStealGunGamePlayer(player));
@@ -120,13 +119,10 @@ public class LifeStealGunGame : BattleBitModule
 
     public override Task<bool> OnPlayerRequestingToChangeRole(RunnerPlayer player, GameRole requestedRole)
     {
-        if (requestedRole != GameRole.Assault)
-        {
-            player.Message("You can only be Assault!", 5);
-            return Task.FromResult(false);
-        }
+        if (requestedRole == GameRole.Assault) return Task.FromResult(true);
+        player.Message("You can only be Assault!", 5);
+        return Task.FromResult(false);
 
-        return Task.FromResult(true);
     }
 
     public override Task OnPlayerJoinedSquad(RunnerPlayer player, Squad<RunnerPlayer> squad)
@@ -159,13 +155,19 @@ public class LifeStealGunGame : BattleBitModule
                     Server.ForceStartGame();
                     break;
                 }
+                case GameState.CountingDown:
+                    break;
+                case GameState.EndingGame:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             await Task.Delay(1000);
         });
     }
 
-    public void UpdateLeaderboard(List<LifeStealGunGamePlayer> top5)
+    private void UpdateLeaderboard(IReadOnlyList<LifeStealGunGamePlayer> top5)
     {
         var infoMessage = new StringBuilder();
         infoMessage.AppendLine(
@@ -189,22 +191,22 @@ public class LifeStealGunGame : BattleBitModule
             playerStatsMessage.AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("Gold")} Your Stats {RichText.FromColorName("White")}");
             playerStatsMessage.AppendLine(
-                $"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")} Kills: {RichText.FromColorName("White")}{getPlayer(player).Kills} {RichText.FromColorName("Red")}Deaths: {RichText.FromColorName("White")}{getPlayer(player).Deaths}");
+                $"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")} Kills: {RichText.FromColorName("White")}{GetPlayer(player).Kills} {RichText.FromColorName("Red")}Deaths: {RichText.FromColorName("White")}{GetPlayer(player).Deaths}");
             playerStatsMessage.AppendLine(
-                $"{RichText.Bold(true)}{RichText.FromColorName("Blue")} K/D: {RichText.FromColorName("White")}{getPlayer(player).Kd}");
+                $"{RichText.Bold(true)}{RichText.FromColorName("Blue")} K/D: {RichText.FromColorName("White")}{GetPlayer(player).Kd}");
 
             if (player.IsAlive)
             {
                 player.Message($"{infoMessage} + {leaderboardMessage} + {playerStatsMessage}");
             }
-            else if (player.HP < 0 || getPlayer(player).Deaths == 0)
+            else if (player.HP < 0 || GetPlayer(player).Deaths == 0)
             {
                 player.Message(welcomeMessage);
             }
         }
     }
 
-    public void UpdateLoadout(RunnerPlayer player, Loadout loadout)
+    private static void UpdateLoadout(RunnerPlayer player, Loadout loadout)
     {
         var primaryWeapon = loadout.PrimaryWeapon == null
             ? default
@@ -252,19 +254,19 @@ public class LifeStealGunGame : BattleBitModule
             player.SetLightGadget(lightGadgetName, lightGadgetExtra, true);
     }
 
-    public void ShuffleList<T>(List<T> list)
+    private static void ShuffleList<T>(IList<T> list)
     {
-        Random rng = new System.Random();
-        int n = list.Count;
+        var rng = new System.Random();
+        var n = list.Count;
         while (n > 1)
         {
             n--;
-            int k = rng.Next(n + 1);
+            var k = rng.Next(n + 1);
             (list[k], list[n]) = (list[n], list[k]);
         }
     }
 
-    public void GenerateLoadouts()
+    private void GenerateLoadouts()
     {
         var weapons = LifeStealGunGameConfiguration.WeaponList;
         var barrels = LifeStealGunGameConfiguration.BarrelList;
@@ -274,7 +276,7 @@ public class LifeStealGunGame : BattleBitModule
 
         List<Loadout> loadouts = new();
 
-        Random random = new Random();
+        var random = new Random();
 
         foreach (var weapon in weapons)
         {
@@ -292,7 +294,7 @@ public class LifeStealGunGame : BattleBitModule
         LifeStealGunGameConfiguration.LoadoutList = loadouts;
     }
 
-    public static T GetRandomItem<T>(List<T> itemList, Random random)
+    private static T GetRandomItem<T>(List<T> itemList, Random random)
     {
         if (itemList.Count > 0)
         {
@@ -303,9 +305,9 @@ public class LifeStealGunGame : BattleBitModule
         return default;
     }
 
-    public Loadout GetNewWeapon(RunnerPlayer player)
+    private Loadout GetNewWeapon(RunnerPlayer player)
     {
-        if (getPlayer(player).Kills >= LifeStealGunGameConfiguration.LoadoutList.Count)
+        if (GetPlayer(player).Kills >= LifeStealGunGameConfiguration.LoadoutList.Count)
         {
             Server.SayToAllChat(
                 $"{RichText.FromColorName("Gold")}{player.Name} won the game!");
@@ -317,7 +319,7 @@ public class LifeStealGunGame : BattleBitModule
 
         var loadout = new Loadout()
         {
-            PrimaryWeapon = LifeStealGunGameConfiguration.WeaponList[getPlayer(player).Kills].Name,
+            PrimaryWeapon = LifeStealGunGameConfiguration.WeaponList[GetPlayer(player).Kills].Name,
             PrimaryWeaponSight = GetRandomAttachment(LifeStealGunGameConfiguration.SightList),
             PrimaryWeaponBarrel = GetRandomAttachment(LifeStealGunGameConfiguration.BarrelList),
             PrimaryWeaponUnderBarrel = GetRandomAttachment(LifeStealGunGameConfiguration.UnderBarrelRailList),
@@ -327,7 +329,7 @@ public class LifeStealGunGame : BattleBitModule
         return loadout;
     }
 
-    public static string GetRandomAttachment(List<Attachment> attachmentList)
+    private static string GetRandomAttachment(IReadOnlyList<Attachment> attachmentList)
     {
         if (attachmentList.Count <= 0) return default;
 
@@ -378,13 +380,13 @@ public class LifeStealGunGame : BattleBitModule
         if (args.Killer == args.Victim)
         {
             args.Victim.Kill();
-            getPlayer(args.Victim).Deaths++;
+            GetPlayer(args.Victim).Deaths++;
         }
         else
         {
             // args.Victim.Kill();
-            getPlayer(args.Victim).Deaths++;
-            getPlayer(args.Killer).Kills++;
+            GetPlayer(args.Victim).Deaths++;
+            GetPlayer(args.Killer).Kills++;
             args.Killer.SetHP(100);
 
             var newLoadout = GetNewWeapon(args.Killer);
