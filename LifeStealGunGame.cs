@@ -86,7 +86,16 @@ public class LifeStealGunGame : BattleBitModule
         ShuffleList(LifeStealGunGameConfiguration.WeaponList);
         GenerateLoadouts();
 
-        Console.Write("Current Weapons:" + LifeStealGunGameConfiguration.WeaponList);
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        Console.WriteLine("Current Loadout Rotation:");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        var loadoutIndex = 1;
+        foreach (var loadout in LifeStealGunGameConfiguration.LoadoutList)
+        {
+            Console.WriteLine(loadoutIndex + ". Weapon " + loadout.PrimaryWeapon + " with Sight " + loadout.PrimaryWeaponSight);
+            loadoutIndex++;
+        }
+        Console.ResetColor();
 
         return Task.CompletedTask;
     }
