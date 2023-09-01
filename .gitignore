@@ -6,3 +6,5 @@ riderModule.iml
 RichText.cs
 LoadingScreenText.cs
 DiscordWebhook.cs
+Announcements.cs
+ProfanityFilter.cs
