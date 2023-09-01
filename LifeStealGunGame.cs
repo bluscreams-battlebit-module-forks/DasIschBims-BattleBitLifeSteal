@@ -125,6 +125,9 @@ public class LifeStealGunGame : BattleBitModule
             players.Clear();
 
         Server.ExecuteCommand("set fps 128");
+        
+        ShuffleList(LifeStealGunGameConfiguration.WeaponList);
+        GenerateLoadouts();
 
         return Task.CompletedTask;
     }
