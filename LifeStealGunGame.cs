@@ -193,10 +193,22 @@ public class LifeStealGunGame : BattleBitModule
         foreach (var player in Server.AllPlayers)
         {
             var playerStatsMessage = new StringBuilder();
+            var primaryWeapon = LifeStealGunGameConfiguration.LoadoutList[GetPlayer(player).Kills].PrimaryWeapon;
+            var nextWeapon = string.Empty;
+
+            if (primaryWeapon == null)
+            {
+                nextWeapon = "Special Weapon";
+            }
+            else
+            {
+                nextWeapon = LifeStealGunGameConfiguration.LoadoutList[GetPlayer(player).Kills].PrimaryWeapon;
+            }
+            
             playerStatsMessage.AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
             playerStatsMessage.AppendLine(
-                $"{RichText.Bold(true)}{RichText.FromColorName("Gold")}Next Weapon: {LifeStealGunGameConfiguration.LoadoutList[GetPlayer(player).Kills].PrimaryWeapon}{RichText.Color()}{RichText.NewLine()}");
+                $"{RichText.Bold(true)}{RichText.FromColorName("Gold")}Next Weapon: {nextWeapon}{RichText.Color()}");
             playerStatsMessage.AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("Gold")} Your Stats {RichText.FromColorName("White")}");
             playerStatsMessage.AppendLine(
@@ -337,7 +349,7 @@ public class LifeStealGunGame : BattleBitModule
 
     private Loadout GetNewWeapon(RunnerPlayer player)
     {
-        if (GetPlayer(player).Kills >= LifeStealGunGameConfiguration.LoadoutList.Count * 2)
+        if (GetPlayer(player).Kills >= LifeStealGunGameConfiguration.LoadoutList.Count)
         {
             Server.SayToAllChat(
                 $"{RichText.FromColorName("Gold")}{player.Name} won the game!");
@@ -351,7 +363,7 @@ public class LifeStealGunGame : BattleBitModule
             return default;
         }
 
-        var currentWeaponIndex = GetPlayer(player).Kills / 2;
+        var currentWeaponIndex = GetPlayer(player).Kills;
         var loadout = new Loadout()
         {
             PrimaryWeapon = LifeStealGunGameConfiguration.WeaponList[currentWeaponIndex].Name,
