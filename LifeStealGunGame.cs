@@ -77,14 +77,17 @@ public class LifeStealGunGame : BattleBitModule
             .AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("White")}You have to kill other players to get a better weapon and to replenish your health.{RichText.Color()}{RichText.NewLine()}")
             .AppendLine(
-                $"{RichText.Bold(true)}{RichText.FromColorName("LimeGreen")}There are currently a total of {LifeStealGunGameConfiguration.LoadoutList.Count} levels.{RichText.Color()}{RichText.NewLine()}")
+                $"{RichText.Bold(true)}{RichText.FromColorName("LimeGreen")}There are currently a total of {LifeStealGunGameConfiguration.WeaponList.Count + 3} levels.{RichText.Color()}{RichText.NewLine()}")
             .AppendLine(
                 $"{RichText.Bold(true)}{RichText.Sprite("Special")}{RichText.FromColorName("White")}Made by {RichText.FromColorName("LightCoral")}@DasIschBims{RichText.Color()}{RichText.Sprite("Special")}{RichText.NewLine()}")
             .AppendLine(
                 $"{RichText.Bold(true)}GitHub: {RichText.FromColorName("Gold")}https://github.com/DasIschBims/BattleBitLifeSteal{RichText.Color()}{RichText.NewLine()}")
-            .AppendLine(
-                $"{RichText.Bold(true)}Discord: <color=#9370DB>https://dsc.gg/bblifesteal{RichText.Color()}{RichText.NewLine()}")
             .ToString();
+
+        ShuffleList(LifeStealGunGameConfiguration.WeaponList);
+        GenerateLoadouts();
+
+        Console.Write("Current Weapons:" + LifeStealGunGameConfiguration.WeaponList);
 
         return Task.CompletedTask;
     }
@@ -140,7 +143,7 @@ public class LifeStealGunGame : BattleBitModule
 
     public override async Task OnTick()
     {
-        Task.Run(async () =>
+        await Task.Run(async () =>
         {
             switch (Server.RoundSettings.State)
             {
@@ -160,15 +163,11 @@ public class LifeStealGunGame : BattleBitModule
 
             await Task.Delay(1000);
         });
-
-        await Task.CompletedTask;
     }
 
     public void UpdateLeaderboard(List<LifeStealGunGamePlayer> top5)
     {
         var infoMessage = new StringBuilder();
-        infoMessage.AppendLine(
-            $"{RichText.Bold(true)}{RichText.FromColorName("MediumVioletRed")} Life Steal Gun Game {RichText.FromColorName("LightSkyBlue")}by @DasIschBims{RichText.Color()}{RichText.NewLine()}");
         infoMessage.AppendLine(
             $"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")}{RichText.Sprite("Veteran")} Top 5 Players {RichText.Sprite("Veteran")}");
         infoMessage.AppendLine(
@@ -193,36 +192,16 @@ public class LifeStealGunGame : BattleBitModule
                 $"{RichText.Bold(true)}{RichText.FromColorName("LawnGreen")} Kills: {RichText.FromColorName("White")}{getPlayer(player).Kills} {RichText.FromColorName("Red")}Deaths: {RichText.FromColorName("White")}{getPlayer(player).Deaths}");
             playerStatsMessage.AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("Blue")} K/D: {RichText.FromColorName("White")}{getPlayer(player).Kd}");
-            playerStatsMessage.AppendLine(
-                $"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
 
             if (player.IsAlive)
             {
-                player.Message(infoMessage.ToString() + leaderboardMessage.ToString() +
-                               playerStatsMessage.ToString());
+                player.Message($"{infoMessage} + {leaderboardMessage} + {playerStatsMessage}");
             }
             else if (player.HP < 0 || getPlayer(player).Deaths == 0)
             {
                 player.Message(welcomeMessage);
             }
         }
-    }
-
-    public Loadout GetNewWeapon(RunnerPlayer player)
-    {
-        if (getPlayer(player).Kills >= LifeStealGunGameConfiguration.LoadoutList.Count)
-        {
-            Server.SayToAllChat(
-                $"{RichText.FromColorName("Gold")}{player.Name} won the game!");
-            Server.AnnounceLong(
-                $"{RichText.Sprite("Special")}{RichText.FromColorName("Black")}{player.Name} won the game!{RichText.Sprite("Special")}");
-            Server.ForceEndGame();
-            return default;
-        }
-
-        var loadout = LifeStealGunGameConfiguration.LoadoutList[getPlayer(player).Kills];
-
-        return loadout;
     }
 
     public void UpdateLoadout(RunnerPlayer player, Loadout loadout)
@@ -254,7 +233,11 @@ public class LifeStealGunGame : BattleBitModule
 
         if (primaryWeapon != null)
             player.SetPrimaryWeapon(
-                new WeaponItem() { ToolName = primaryWeapon, MainSightName = loadout.PrimaryWeaponSight },
+                new WeaponItem()
+                {
+                    ToolName = primaryWeapon, MainSightName = loadout.PrimaryWeaponSight,
+                    BarrelName = loadout.PrimaryWeaponBarrel, UnderRailName = loadout.PrimaryWeaponUnderBarrel,
+                },
                 primaryExtraMagazines, true);
 
         if (secondaryWeapon != null)
@@ -267,6 +250,90 @@ public class LifeStealGunGame : BattleBitModule
 
         if (lightGadgetName != null)
             player.SetLightGadget(lightGadgetName, lightGadgetExtra, true);
+    }
+
+    public void ShuffleList<T>(List<T> list)
+    {
+        Random rng = new System.Random();
+        int n = list.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = rng.Next(n + 1);
+            (list[k], list[n]) = (list[n], list[k]);
+        }
+    }
+
+    public void GenerateLoadouts()
+    {
+        var weapons = LifeStealGunGameConfiguration.WeaponList;
+        var barrels = LifeStealGunGameConfiguration.BarrelList;
+        var underBarrels = LifeStealGunGameConfiguration.UnderBarrelRailList;
+        var sights = LifeStealGunGameConfiguration.SightList;
+        var gadgets = LifeStealGunGameConfiguration.GadgetList;
+
+        List<Loadout> loadouts = new();
+
+        Random random = new Random();
+
+        foreach (var weapon in weapons)
+        {
+            var loadout = new Loadout();
+
+            loadout.PrimaryWeapon = weapon.Name;
+            loadout.PrimaryWeaponBarrel = random.Next(0, 100) < 69 ? null : GetRandomItem(barrels, random).Name;
+            loadout.PrimaryWeaponUnderBarrel = random.Next(0, 100) < 69 ? null : GetRandomItem(underBarrels, random).Name;
+            loadout.PrimaryWeaponSight = GetRandomItem(sights, random).Name;
+            loadout.HeavyGadgetName = random.Next(0, 100) < 69 ? null : GetRandomItem(gadgets, random).Name;
+
+            loadouts.Add(loadout);
+        }
+
+        LifeStealGunGameConfiguration.LoadoutList = loadouts;
+    }
+
+    public static T GetRandomItem<T>(List<T> itemList, Random random)
+    {
+        if (itemList.Count > 0)
+        {
+            int randomIndex = random.Next(0, itemList.Count);
+            return itemList[randomIndex];
+        }
+        
+        return default;
+    }
+
+    public Loadout GetNewWeapon(RunnerPlayer player)
+    {
+        if (getPlayer(player).Kills >= LifeStealGunGameConfiguration.LoadoutList.Count)
+        {
+            Server.SayToAllChat(
+                $"{RichText.FromColorName("Gold")}{player.Name} won the game!");
+            Server.AnnounceLong(
+                $"{RichText.Sprite("Special")}{RichText.FromColorName("Black")}{player.Name} won the game!{RichText.Sprite("Special")}");
+            Server.ForceEndGame();
+            return default;
+        }
+
+        var loadout = new Loadout()
+        {
+            PrimaryWeapon = LifeStealGunGameConfiguration.WeaponList[getPlayer(player).Kills].Name,
+            PrimaryWeaponSight = GetRandomAttachment(LifeStealGunGameConfiguration.SightList),
+            PrimaryWeaponBarrel = GetRandomAttachment(LifeStealGunGameConfiguration.BarrelList),
+            PrimaryWeaponUnderBarrel = GetRandomAttachment(LifeStealGunGameConfiguration.UnderBarrelRailList),
+            PrimaryExtraMagazines = 20,
+        };
+
+        return loadout;
+    }
+
+    public static string GetRandomAttachment(List<Attachment> attachmentList)
+    {
+        if (attachmentList.Count <= 0) return default;
+
+        var random = new Random();
+        var randomIndex = random.Next(0, attachmentList.Count);
+        return attachmentList[randomIndex].Name;
     }
 
     public override Task OnPlayerSpawned(RunnerPlayer player)
@@ -323,9 +390,9 @@ public class LifeStealGunGame : BattleBitModule
             var newLoadout = GetNewWeapon(args.Killer);
 
             UpdateLoadout(args.Killer, newLoadout);
-            
+
             List<LifeStealGunGamePlayer> top5 = players.Values.OrderByDescending(x => x.Kills).Take(5).ToList();
-            
+
             UpdateLeaderboard(top5);
         }
 
@@ -349,164 +416,79 @@ public class LifeStealGunGamePlayer
 
 public class LifeStealGunGameConfiguration
 {
-    public readonly List<Loadout> LoadoutList = new()
+    public readonly List<Attachment> SightList = new()
     {
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.M4A1.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.AK74.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.KrissVector.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.MP5.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.P90.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.AsVal.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.Groza.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.SCARH.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.MK14EBR.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.M110.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.AK15.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.AUGA3.Name,
-            PrimaryWeaponSight = Attachments.RedDot.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.MSR.Name,
-            PrimaryWeaponSight = Attachments.TRI4X32.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.M200.Name,
-            PrimaryWeaponSight = Attachments.TRI4X32.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            PrimaryWeapon = Weapons.SV98.Name,
-            PrimaryWeaponSight = Attachments.TRI4X32.Name,
-            PrimaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            SecondaryWeapon = Weapons.DesertEagle.Name,
-            SecondaryWeaponSight = Attachments.RedDot.Name,
-            SecondaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            SecondaryWeapon = Weapons.Rsh12.Name,
-            SecondaryWeaponSight = Attachments.RedDot.Name,
-            SecondaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            SecondaryWeapon = Weapons.Glock18.Name,
-            SecondaryWeaponSight = Attachments.RedDot.Name,
-            SecondaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            SecondaryWeapon = Weapons.USP.Name,
-            SecondaryWeaponSight = Attachments.RedDot.Name,
-            SecondaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            SecondaryWeapon = Weapons.Unica.Name,
-            SecondaryWeaponSight = Attachments.RedDot.Name,
-            SecondaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            SecondaryWeapon = Weapons.MP443.Name,
-            SecondaryWeaponSight = Attachments.RedDot.Name,
-            SecondaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            SecondaryWeapon = Weapons.USP.Name,
-            SecondaryWeaponSight = Attachments.RedDot.Name,
-            SecondaryExtraMagazines = byte.MaxValue
-        },
-        new Loadout()
-        {
-            HeavyGadgetName = Gadgets.Rpg7HeatExplosive.Name,
-            HeavyGadgetExtra = byte.MaxValue,
-        },
-        new Loadout()
-        {
-            HeavyGadgetName = Gadgets.SledgeHammerSkinC.Name,
-        },
-        new Loadout()
-        {
-            HeavyGadgetName = Gadgets.PickaxeIronPickaxe.Name,
-        },
-        new Loadout()
-        {
-            LightGadgetName = Gadgets.SuicideC4.Name,
-        }
+        Attachments.Holographic,
+        Attachments.RedDot,
+        Attachments.Reflex,
+        Attachments.Strikefire,
+        Attachments.Kobra
     };
+
+    public readonly List<Attachment> BarrelList = new()
+    {
+        Attachments.Basic,
+        Attachments.Tactical,
+        Attachments.SDN6762,
+        Attachments.LongBarrel,
+        Attachments.SuppressorShort
+    };
+
+    public readonly List<Attachment> UnderBarrelRailList = new()
+    {
+        Attachments.VerticalGrip,
+        Attachments.B25URK,
+        Attachments.StabilGrip,
+        Attachments.FABDTFG,
+        Attachments.AngledGrip
+    };
+
+    public List<Weapon> WeaponList = new()
+    {
+        Weapons.AK74,
+        Weapons.M4A1,
+        Weapons.G36C,
+        Weapons.ACR,
+        Weapons.SCARH,
+        Weapons.AUGA3,
+        Weapons.SG550,
+        Weapons.HK419,
+        Weapons.AsVal,
+        Weapons.ScorpionEVO,
+        Weapons.FAL,
+        Weapons.HoneyBadger,
+        Weapons.KrissVector,
+        Weapons.PP2000,
+        Weapons.MP5,
+        Weapons.MP7,
+        Weapons.PP19,
+        Weapons.L96,
+        Weapons.M110,
+        Weapons.Ultimax100,
+        Weapons.MG36,
+        Weapons.Glock18,
+        Weapons.USP,
+        Weapons.DesertEagle,
+        Weapons.M9,
+    };
+
+    public readonly List<Gadget> GadgetList = new()
+    {
+        Gadgets.Rpg7HeatExplosive,
+        Gadgets.SledgeHammerSkinC,
+        Gadgets.PickaxeIronPickaxe,
+        Gadgets.SuicideC4
+    };
+
+    public List<Loadout> LoadoutList = new();
 }
 
 public struct Loadout
 {
     public string? PrimaryWeapon { get; set; } = default;
     public string? PrimaryWeaponSight { get; set; } = default;
+    public string? PrimaryWeaponBarrel { get; set; } = default;
+    public string? PrimaryWeaponUnderBarrel { get; set; } = default;
     public byte PrimaryExtraMagazines { get; set; } = 0;
     public string? SecondaryWeapon { get; set; } = default;
     public string? SecondaryWeaponSight { get; set; } = default;
