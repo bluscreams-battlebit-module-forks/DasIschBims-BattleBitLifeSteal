@@ -328,7 +328,11 @@ public class LifeStealGunGame : BattleBitModule
                 $"{RichText.FromColorName("Gold")}{player.Name} won the game!");
             Server.AnnounceLong(
                 $"{RichText.Sprite("Special")}{RichText.FromColorName("Black")}{player.Name} won the game!{RichText.Sprite("Special")}");
-            Server.ForceEndGame();
+
+            var top5 = players.Values.OrderByDescending(x => x.Kills).Take(5).ToList();
+            var topPlayerList = top5.Select(topPlayer => new EndGamePlayer<RunnerPlayer>(topPlayer.Player, GetPlayer(topPlayer.Player).Kills)).ToList();
+
+            Server.ForceEndGame(topPlayerList);
             return default;
         }
 
