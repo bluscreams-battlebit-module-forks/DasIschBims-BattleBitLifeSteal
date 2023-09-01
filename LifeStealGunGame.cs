@@ -197,9 +197,9 @@ public class LifeStealGunGame : BattleBitModule
 
             if (player.IsAlive)
             {
-                player.Message($"{infoMessage} + {leaderboardMessage} + {playerStatsMessage}");
+                player.Message($"{infoMessage}{leaderboardMessage}{playerStatsMessage}");
             }
-            else if (player.HP < 0 || GetPlayer(player).Deaths == 0)
+            else if ((player.HP <= 0 || GetPlayer(player).Deaths == 0) && player.IsAlive == false)
             {
                 player.Message(welcomeMessage);
             }
@@ -289,6 +289,21 @@ public class LifeStealGunGame : BattleBitModule
             loadout.HeavyGadgetName = random.Next(0, 100) < 69 ? null : GetRandomItem(gadgets, random).Name;
 
             loadouts.Add(loadout);
+        }
+
+        foreach (var gadget in gadgets)
+        {
+            var gadgetLoadout = new Loadout();
+
+            if (gadget.Name == "SuicideC4")
+            {
+                gadgetLoadout.LightGadgetName = gadget.Name;
+            }
+            else
+            {
+                gadgetLoadout.HeavyGadgetName = gadget.Name;
+                gadgetLoadout.HeavyGadgetExtra = byte.MaxValue;
+            }
         }
 
         LifeStealGunGameConfiguration.LoadoutList = loadouts;
