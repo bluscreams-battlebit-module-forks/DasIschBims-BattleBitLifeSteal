@@ -150,7 +150,7 @@ public class LifeStealGunGame : BattleBitModule
 
     public override Task OnTick()
     {
-        Task.Run(async () =>
+        Task.Run(() =>
         {
             switch (Server.RoundSettings.State)
             {
@@ -167,8 +167,6 @@ public class LifeStealGunGame : BattleBitModule
                     break;
                 }
             }
-
-            await Task.Delay(1000);
         });
 
         return Task.CompletedTask;
