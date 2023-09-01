@@ -76,7 +76,7 @@ public class LifeStealGunGame : BattleBitModule
             .AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("White")}You have to kill other players to get a better weapon and to replenish your health.{RichText.Color()}{RichText.NewLine()}")
             .AppendLine(
-                $"{RichText.Bold(true)}{RichText.FromColorName("LimeGreen")}There are currently a total of {LifeStealGunGameConfiguration.WeaponList.Count + 3} levels.{RichText.Color()}{RichText.NewLine()}")
+                $"{RichText.Bold(true)}{RichText.FromColorName("LimeGreen")}There are currently a total of {LifeStealGunGameConfiguration.WeaponList.Count + 4} levels.{RichText.Color()}{RichText.NewLine()}")
             .AppendLine(
                 $"{RichText.Bold(true)}{RichText.Sprite("Special")}{RichText.FromColorName("White")}Made by {RichText.FromColorName("LightCoral")}@DasIschBims{RichText.Color()}{RichText.Sprite("Special")}{RichText.NewLine()}")
             .AppendLine(
@@ -92,9 +92,11 @@ public class LifeStealGunGame : BattleBitModule
         var loadoutIndex = 1;
         foreach (var loadout in LifeStealGunGameConfiguration.LoadoutList)
         {
-            Console.WriteLine(loadoutIndex + ". Weapon " + loadout.PrimaryWeapon + " with Sight " + loadout.PrimaryWeaponSight);
+            Console.WriteLine(loadoutIndex + ". Weapon " + loadout.PrimaryWeapon + " with Sight " +
+                              loadout.PrimaryWeaponSight);
             loadoutIndex++;
         }
+
         Console.ResetColor();
 
         return Task.CompletedTask;
@@ -131,7 +133,6 @@ public class LifeStealGunGame : BattleBitModule
         if (requestedRole == GameRole.Assault) return Task.FromResult(true);
         player.Message("You can only be Assault!", 5);
         return Task.FromResult(false);
-
     }
 
     public override Task OnPlayerJoinedSquad(RunnerPlayer player, Squad<RunnerPlayer> squad)
@@ -164,13 +165,9 @@ public class LifeStealGunGame : BattleBitModule
                     Server.ForceStartGame();
                     break;
                 }
-                case GameState.CountingDown:
-                    break;
-                case GameState.EndingGame:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
+
+            await Task.Delay(1000);
         });
     }
 
@@ -259,7 +256,9 @@ public class LifeStealGunGame : BattleBitModule
 
         if (primaryWeapon != null)
         {
-            var cantedSight = loadout.PrimaryWeaponCantedSight == null ? default : new Attachment(loadout.PrimaryWeaponCantedSight, AttachmentType.CantedSight);
+            var cantedSight = loadout.PrimaryWeaponCantedSight == null
+                ? default
+                : new Attachment(loadout.PrimaryWeaponCantedSight, AttachmentType.CantedSight);
             player.SetPrimaryWeapon(
                 new WeaponItem()
                 {
@@ -312,7 +311,8 @@ public class LifeStealGunGame : BattleBitModule
 
             loadout.PrimaryWeapon = weapon.Name;
             loadout.PrimaryWeaponBarrel = random.Next(0, 100) < 69 ? null : GetRandomItem(barrels, random).Name;
-            loadout.PrimaryWeaponUnderBarrel = random.Next(0, 100) < 69 ? null : GetRandomItem(underBarrels, random).Name;
+            loadout.PrimaryWeaponUnderBarrel =
+                random.Next(0, 100) < 69 ? null : GetRandomItem(underBarrels, random).Name;
             loadout.PrimaryWeaponSight = GetRandomItem(sights, random).Name;
             if (weapon.WeaponType == WeaponType.SniperRifle)
                 loadout.PrimaryWeaponCantedSight = Attachments.Ironsight.Name;
@@ -346,7 +346,7 @@ public class LifeStealGunGame : BattleBitModule
             int randomIndex = random.Next(0, itemList.Count);
             return itemList[randomIndex];
         }
-        
+
         return default;
     }
 
@@ -360,7 +360,8 @@ public class LifeStealGunGame : BattleBitModule
                 $"{RichText.Sprite("Special")}{RichText.FromColorName("Black")}{player.Name} won the game!{RichText.Sprite("Special")}");
 
             var top3 = players.Values.OrderByDescending(x => x.Kills).Take(3).ToList();
-            var topPlayerList = top3.Select(topPlayer => new EndGamePlayer<RunnerPlayer>(topPlayer.Player, GetPlayer(topPlayer.Player).Kills)).ToList();
+            var topPlayerList = top3.Select(topPlayer =>
+                new EndGamePlayer<RunnerPlayer>(topPlayer.Player, GetPlayer(topPlayer.Player).Kills)).ToList();
 
             Server.ForceEndGame(topPlayerList);
             return default;
@@ -552,5 +553,7 @@ public struct Loadout
 
     public byte LightGadgetExtra { get; set; } = 0;
 
-    public Loadout() {}
+    public Loadout()
+    {
+    }
 }
