@@ -30,6 +30,7 @@ public class LifeStealGunGame : BattleBitModule
         "Frugis",
         "Dustydew",
         "Construction",
+        "Wineparadise",
         "Old_Multuislands",
         "Old_Namak"
     };
@@ -336,6 +337,8 @@ public class LifeStealGunGame : BattleBitModule
                 gadgetLoadout.HeavyGadgetName = gadget.Name;
                 gadgetLoadout.HeavyGadgetExtra = byte.MaxValue;
             }
+            
+            loadouts.Add(gadgetLoadout);
         }
 
         LifeStealGunGameConfiguration.LoadoutList = loadouts;
@@ -398,7 +401,7 @@ public class LifeStealGunGame : BattleBitModule
         player.Modifications.RunningSpeedMultiplier = 1.5f;
 
         player.Modifications.FallDamageMultiplier = 0f;
-        player.Modifications.CanSpectate = false;
+        player.Modifications.CanSpectate = true;
         player.Modifications.ReloadSpeedMultiplier = 1.5f;
         player.Modifications.GiveDamageMultiplier = 1f;
         player.Modifications.RespawnTime = 1;
