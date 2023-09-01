@@ -147,7 +147,7 @@ public class LifeStealGunGame : BattleBitModule
         return Task.FromResult(false);
     }
 
-    public override async Task OnTick()
+    public override Task OnTick()
     {
         Task.Run(async () =>
         {
@@ -169,6 +169,8 @@ public class LifeStealGunGame : BattleBitModule
 
             await Task.Delay(1000);
         });
+
+        return Task.CompletedTask;
     }
 
     private void UpdateLeaderboard(IReadOnlyList<LifeStealGunGamePlayer> top5)
