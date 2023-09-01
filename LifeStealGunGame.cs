@@ -193,18 +193,21 @@ public class LifeStealGunGame : BattleBitModule
         foreach (var player in Server.AllPlayers)
         {
             var playerStatsMessage = new StringBuilder();
-            var primaryWeapon = LifeStealGunGameConfiguration.LoadoutList[GetPlayer(player).Kills].PrimaryWeapon;
-            var nextWeapon = string.Empty;
+            var nextWeapon = LifeStealGunGameConfiguration.LoadoutList[GetPlayer(player).Kills + 1].PrimaryWeapon;
 
-            if (primaryWeapon == null)
+            if (GetPlayer(player).Kills + 1 < LifeStealGunGameConfiguration.LoadoutList.Count)
             {
-                nextWeapon = "Special Weapon";
+                nextWeapon = LifeStealGunGameConfiguration.LoadoutList[GetPlayer(player).Kills + 1].PrimaryWeapon;
+                if (nextWeapon == null)
+                {
+                    nextWeapon = "Special Weapon";
+                }
             }
             else
             {
-                nextWeapon = LifeStealGunGameConfiguration.LoadoutList[GetPlayer(player).Kills].PrimaryWeapon;
+                nextWeapon = "Finished!";
             }
-            
+
             playerStatsMessage.AppendLine(
                 $"{RichText.Bold(true)}{RichText.FromColorName("LightGoldenrodYellow")}{RichText.Bold(true)}----------------------------------------------");
             playerStatsMessage.AppendLine(
