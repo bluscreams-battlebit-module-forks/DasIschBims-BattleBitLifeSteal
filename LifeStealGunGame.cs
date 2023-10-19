@@ -422,6 +422,7 @@ public class LifeStealGunGamePlayer {
 }
 
 public class LifeStealGunGameConfiguration {
+
     public readonly List<Attachment> SightList = new()
     {
         Attachments.Holographic,
